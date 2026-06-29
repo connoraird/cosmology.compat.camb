@@ -12,8 +12,8 @@ def rng():
 
 
 @pytest.fixture(scope="session")
-def z(rng):
-    return np.sort(rng.uniform(0.0, 5.0, 100))
+def z(rng, xp):
+    return xp.sort(xp.asarray(rng.uniform(0.0, 5.0, 100)))
 
 
 @pytest.fixture(scope="session")
@@ -30,7 +30,7 @@ def compare():
 
 
 @pytest.fixture(scope="session")
-def cosmo(compare):
+def cosmo(compare, xp):
     pars = camb.set_params(
         H0=compare.H0.value,
         omch2=(compare.Om0 - compare.Ob0) * compare.h**2,
@@ -44,7 +44,9 @@ def cosmo(compare):
         nnu=0.0,
     )
     results = camb.get_background(pars)
-    return cosmology.compat.camb.Cosmology(results)
+    cosmo = cosmology.compat.camb.Cosmology(results)
+    cosmo.set_xp(xp)
+    return cosmo
 
 
 def test_h(cosmo, compare):
@@ -55,16 +57,16 @@ def test_H0(cosmo, compare):
     assert compare.H0.value == cosmo.H0
 
 
-def test_Omega_m0(cosmo, compare):
-    np.testing.assert_allclose(
+def test_Omega_m0(cosmo, compare, xp):
+    np.testing.assert_close(
         cosmo.Omega_m0,
         compare.Om0,
         rtol=1e-10,
     )
 
 
-def test_Omega_de0(cosmo, compare):
-    np.testing.assert_allclose(
+def test_Omega_de0(cosmo, compare, xp):
+    np.testing.assert_close(
         cosmo.Omega_de0,
         compare.Ode0,
         rtol=1e-10,

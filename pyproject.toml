@@ -39,11 +39,13 @@ doc = [
   "furo"
 ]
 test = [
+  "array_api_strict>=2.3.1",
   "astropy",
   "camb",
   "cosmology.api",
+  "jax>=0.6.2",
   "pytest",
-  "pytest-cov"
+  "pytest-cov",
 ]
 
 [project.urls]
