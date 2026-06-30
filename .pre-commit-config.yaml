@@ -5,6 +5,9 @@ ci:
   autoupdate_commit_msg: "pre-commit.ci: update pre-commit hooks"
   autofix_commit_msg: "pre-commit.ci: style fixes"
 
+default_language_version:
+  python: python3.10
+
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v6.0.0
