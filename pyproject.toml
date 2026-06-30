@@ -45,7 +45,7 @@ test = [
   "cosmology.api",
   "jax>=0.6.2",
   "pytest",
-  "pytest-cov",
+  "pytest-cov"
 ]
 
 [project.urls]

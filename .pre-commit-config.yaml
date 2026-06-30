@@ -55,4 +55,6 @@ repos:
         files: ^src|^tests
         additional_dependencies:
           - numpy>=2.2.2
+          - jaxtyping
+          - array-api-strict
         args: [--strict, --python-version=3.10]

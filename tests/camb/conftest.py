@@ -1,10 +1,12 @@
+"""Fixtures shared across multiple test files."""
+
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-import numpy as np
 import array_api_strict
 import jax
+import numpy as np
 import pytest
 
 if TYPE_CHECKING:
@@ -16,10 +18,10 @@ xp_available_backends: dict[str, ModuleType] = {
     "jax.numpy": jax.numpy,
 }
 
+
 @pytest.fixture(params=xp_available_backends.values(), scope="session")
 def xp(request: pytest.FixtureRequest) -> ModuleType:
-    """
-    Fixture for array backend.
+    """Fixture for array backend.
 
     Access array library functions using `xp.` in tests.
 
