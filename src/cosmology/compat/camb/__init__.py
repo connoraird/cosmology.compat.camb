@@ -26,7 +26,7 @@ class Cosmology:
 
     data: CAMBdata
     params: CAMBparams = field(init=False)
-    xp: ModuleType
+    xp: ModuleType = field(init=False)
 
     def __post_init__(self) -> None:
         object.__setattr__(self, "params", self.data.Params)
@@ -39,32 +39,32 @@ class Cosmology:
     @property
     def h(self) -> FloatArray:
         """Little h."""
-        return self.xp.array(self.params.h)
+        return self.xp.asarray(self.params.h)
 
     @property
     def H0(self) -> FloatArray:
         """Hubble constant."""
-        return self.xp.array(self.params.H0)
+        return self.xp.asarray(self.params.H0)
 
     @property
     def Omega_m0(self) -> FloatArray:
         """Total matter today, excluding massive neutrinos."""
-        return self.xp.array(self.params.omegam)
+        return self.xp.asarray(self.params.omegam)
 
     @property
     def Omega_de0(self) -> FloatArray:
         """Dark energy today."""
-        return self.xp.array(self.data.omega_de)
+        return self.xp.asarray(self.data.omega_de)
 
     @property
     def Omega_k0(self) -> FloatArray:
         """Curvature today."""
-        return self.xp.array(self.params.omk)
+        return self.xp.asarray(self.params.omk)
 
     @property
     def hubble_distance(self) -> FloatArray:
         """Hubble distance."""
-        return self.xp.array(299792.458 / self.params.H0)
+        return self.xp.asarray(299792.458 / self.params.H0)
 
     @property
     def critical_density0(self) -> FloatArray:
@@ -72,27 +72,28 @@ class Cosmology:
         # gravitational constant kappa = 8pi G/c^2 in Mpc Msol-1
         # uses nominal value of (G Msol) following IAU 2015
         kappa = 1.202706180375887e-18
-        return self.xp.array(self.data.grhocrit / kappa)
+        return self.xp.asarray(self.data.grhocrit / kappa)
 
     def H(self, z: FloatArray | float) -> FloatArray:
         """Hubble parameter at redshift *z*."""
-        return self.xp.array(self.data.hubble_parameter(z))
+        return self.xp.asarray(self.data.hubble_parameter(np.asarray(z)))
 
     def Omega_m(self, z: FloatArray | float) -> FloatArray:
         """Total matter, excluding massive neutrinos, at redshift *z*."""
-        return self.xp.array(
-            self.data.get_Omega("baryon", z)
-            + self.data.get_Omega("cdm", z)
-            + self.data.get_Omega("nu", z)
+        z_np = np.asarray(z)
+        return self.xp.asarray(
+            self.data.get_Omega("baryon", z_np)
+            + self.data.get_Omega("cdm", z_np)
+            + self.data.get_Omega("nu", z_np)
         )
 
     def Omega_de(self, z: FloatArray | float) -> FloatArray:
         """Dark energy at redshift *z*."""
-        return self.xp.array(self.data.get_Omega("de", z))
+        return self.xp.asarray(self.data.get_Omega("de", np.asarray(z)))
 
     def Omega_k(self, z: FloatArray | float) -> FloatArray:
         """Curvature at redshift *z*."""
-        return self.xp.array(self.data.get_Omega("K", z))
+        return self.xp.asarray(self.data.get_Omega("K", np.asarray(z)))
 
     def comoving_distance(
         self,
@@ -105,16 +106,19 @@ class Cosmology:
         redshifts *z* and *z2*.
 
         """
+        z_np = np.asarray(z)
         if z2 is not None:
-            return self.xp.array(
-                self.data.comoving_radial_distance(z2)
-                - self.data.comoving_radial_distance(z),
+            return self.xp.asarray(
+                self.data.comoving_radial_distance(np.asarray(z2))
+                - self.data.comoving_radial_distance(z_np),
             )
-        return self.xp.array(self.data.comoving_radial_distance(z))
+        return self.xp.asarray(self.data.comoving_radial_distance(z_np))
 
     def inv_comoving_distance(self, x: FloatArray | float) -> FloatArray:
         """Return redshift at which the comoving distance is *x*."""
-        return self.xp.array(self.data.redshift_at_comoving_radial_distance(x))
+        return self.xp.asarray(
+            self.data.redshift_at_comoving_radial_distance(np.asarray(x))
+        )
 
     def angular_diameter_distance(
         self,
@@ -127,13 +131,16 @@ class Cosmology:
         redshifts *z* and *z2*.
 
         """
+        z_np = np.asarray(z)
         if z2 is not None:
-            return self.xp.array(self.data.angular_diameter_distance2(z, z2))
-        return self.xp.array(self.data.angular_diameter_distance(z))
+            return self.xp.asarray(
+                self.data.angular_diameter_distance2(z_np, np.asarray(z2))
+            )
+        return self.xp.asarray(self.data.angular_diameter_distance(z_np))
 
     def H_over_H0(self, z: FloatArray | float) -> FloatArray:
         """Standardised Hubble function :math:`E(z) = H(z)/H_0`."""
-        return self.H(z) / self.H0
+        return self.H(np.asarray(z)) / self.xp.asarray(self.H0)
 
     def transverse_comoving_distance(
         self,
@@ -146,6 +153,11 @@ class Cosmology:
         redshifts *z* and *z2*.
 
         """
+        z_np = np.asarray(z)
         if z2 is not None:
-            return self.xp.array((1 + z2) * self.data.angular_diameter_distance2(z, z2))
-        return self.xp.array((1 + z) * self.data.angular_diameter_distance(z))
+            z2_np = np.asarray(z2)
+            return self.xp.asarray(
+                (1 + z2_np)
+                * self.data.angular_diameter_distance2(z_np, np.asarray(z2_np))
+            )
+        return self.xp.asarray((1 + z_np) * self.data.angular_diameter_distance(z_np))
