@@ -18,6 +18,10 @@ xp_available_backends: dict[str, ModuleType] = {
     "jax.numpy": jax.numpy,
 }
 
+# enable 64 bit numbers
+jax.config.update("jax_enable_x64", val=True)
+array_api_strict.set_array_api_strict_flags(api_version="2025.12")
+
 
 @pytest.fixture(params=xp_available_backends.values(), scope="session")
 def xp(request: pytest.FixtureRequest) -> ModuleType:
